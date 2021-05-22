@@ -4,6 +4,7 @@ COPY . /app
 WORKDIR /app
 
 RUN apk add --no-cache \
+        supervisor \
         gcc \
         libsodium-dev \
         libffi-dev \
@@ -16,5 +17,17 @@ RUN apk add --no-cache \
     cp docker-apiconfig.py userapiconfig.py && \
     apk del --purge .build
 
-CMD ["server.py"]
-ENTRYPOINT ["python"]
+CMD mkdir /etc/supervisor.d && \
+    cat>/etc/supervisor.d/ss.conf<<EOF
+    [supervisord]
+    pidfile=/var/supervisord.pid
+    nodaemon=true
+    [program:ss]
+    command = python /app/server.py
+    stdout_logfile = /var/log/ssmu.log
+    stderr_logfile = /var/log/ssmu.log
+    user = root
+    autostart = true
+    autorestart = true
+    EOF && \
+    supervisord -c /etc/supervisor.d/ss.conf
