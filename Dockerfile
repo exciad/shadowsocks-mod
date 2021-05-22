@@ -15,19 +15,17 @@ RUN apk add --no-cache \
         cargo && \
     pip install --no-cache-dir -r requirements.txt && \
     cp docker-apiconfig.py userapiconfig.py && \
-    apk del --purge .build
+    apk del --purge .build && \
+    mkdir /etc/supervisor.d && \
+    echo $'[supervisord] \n\
+pidfile=/var/supervisord.pid \n\
+nodaemon=true \n\
+[program:ss] \n\
+command = python /app/server.py \n\
+stdout_logfile = /var/log/ssmu.log \n\
+stderr_logfile = /var/log/ssmu.log \n\
+user = root \n\
+autostart = true \n\
+autorestart = true' >> /etc/supervisor.d/ss.conf
 
-CMD mkdir /etc/supervisor.d && \
-    cat>/etc/supervisor.d/ss.ini<<EOF
-    [supervisord]
-    pidfile=/var/supervisord.pid
-    nodaemon=true
-    [program:ss]
-    command = python /app/server.py
-    stdout_logfile = /var/log/ssmu.log
-    stderr_logfile = /var/log/ssmu.log
-    user = root
-    autostart = true
-    autorestart = true
-    EOF && \
-    supervisord -c /etc/supervisor.d/ss.ini
+CMD supervisord -c /etc/supervisor.d/ss.conf
