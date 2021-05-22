@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     apk del --purge .build
 
 CMD mkdir /etc/supervisor.d && \
-    cat>/etc/supervisor.d/ss.conf<<EOF
+    cat>/etc/supervisor.d/ss.ini<<EOF
     [supervisord]
     pidfile=/var/supervisord.pid
     nodaemon=true
@@ -30,4 +30,4 @@ CMD mkdir /etc/supervisor.d && \
     autostart = true
     autorestart = true
     EOF && \
-    supervisord -c /etc/supervisor.d/ss.conf
+    supervisord -c /etc/supervisor.d/ss.ini
